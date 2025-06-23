@@ -29,6 +29,7 @@ if (file_exists(ABSPATH . '../.env')) {
 require_once CHT_THEME_DIR . '/inc/core/class-theme-setup.php';
 require_once CHT_THEME_DIR . '/inc/core/class-virtual-pages.php';
 require_once CHT_THEME_DIR . '/inc/core/class-rewrite-rules.php';
+require_once CHT_THEME_DIR . '/inc/core/class-homepage-builder.php';
 require_once CHT_THEME_DIR . '/inc/api/class-openai-integration.php';
 require_once CHT_THEME_DIR . '/inc/api/class-pixabay-integration.php';
 require_once CHT_THEME_DIR . '/inc/api/class-google-maps.php';
@@ -37,6 +38,7 @@ require_once CHT_THEME_DIR . '/inc/generators/class-meta-generator.php';
 require_once CHT_THEME_DIR . '/inc/generators/class-schema-generator.php';
 require_once CHT_THEME_DIR . '/inc/seo/class-seo-optimizer.php';
 require_once CHT_THEME_DIR . '/inc/seo/class-schema-markup.php';
+require_once CHT_THEME_DIR . '/inc/optimization/class-image-optimizer.php';
 require_once CHT_THEME_DIR . '/inc/forms/class-lead-capture.php';
 require_once CHT_THEME_DIR . '/inc/forms/class-form-handler.php';
 
@@ -44,6 +46,7 @@ require_once CHT_THEME_DIR . '/inc/forms/class-form-handler.php';
 new CHT_Theme_Setup();
 new CHT_Virtual_Pages();
 new CHT_Rewrite_Rules();
+new CHT_Homepage_Builder();
 new CHT_Lead_Capture();
 new CHT_SEO_Optimizer();
 
@@ -70,12 +73,16 @@ add_action('after_setup_theme', function() {
 add_action('wp_enqueue_scripts', function() {
     // Styles
     wp_enqueue_style('cht-main', CHT_THEME_URI . '/style.css', array(), CHT_THEME_VERSION);
+    wp_enqueue_style('cht-modern', CHT_THEME_URI . '/assets/css/style.css', array(), CHT_THEME_VERSION);
+    wp_enqueue_style('cht-header', CHT_THEME_URI . '/assets/css/header.css', array(), CHT_THEME_VERSION);
+    wp_enqueue_style('cht-footer', CHT_THEME_URI . '/assets/css/footer.css', array(), CHT_THEME_VERSION);
     
     // Scripts
     wp_enqueue_script('cht-main', CHT_THEME_URI . '/assets/js/main.js', array('jquery'), CHT_THEME_VERSION, true);
+    wp_enqueue_script('cht-lead-form', CHT_THEME_URI . '/assets/js/lead-form.js', array('jquery'), CHT_THEME_VERSION, true);
     
     // Localize script for AJAX
-    wp_localize_script('cht-main', 'cht_ajax', array(
+    wp_localize_script('cht-lead-form', 'cht_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('cht_ajax_nonce')
     ));

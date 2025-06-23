@@ -1,105 +1,124 @@
 /**
- * Main JavaScript file
+ * Main JavaScript File
  * Corporate Housing Dallas Theme
  */
 
 (function($) {
     'use strict';
     
-    // Mobile menu toggle
-    $('.menu-toggle').on('click', function() {
-        $(this).toggleClass('active');
-        $('.primary-menu').toggleClass('active');
+    // DOM Ready
+    $(document).ready(function() {
+        initHeader();
+        initMobileMenu();
+        initSmoothScroll();
+        initScrollEffects();
     });
     
-    // Smooth scrolling for anchor links
-    $('a[href^="#"]').on('click', function(e) {
-        var target = $(this.getAttribute('href'));
-        if (target.length) {
-            e.preventDefault();
-            $('html, body').animate({
-                scrollTop: target.offset().top - 100
-            }, 800);
-        }
-    });
-    
-    // Lazy loading images
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.add('loaded');
-                    observer.unobserve(img);
-                }
-            });
-        });
+    // Initialize Header
+    function initHeader() {
+        const header = $('#masthead');
+        const scrollThreshold = 50;
         
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            imageObserver.observe(img);
+        // Header scroll effect
+        function updateHeader() {
+            if ($(window).scrollTop() > scrollThreshold) {
+                header.addClass('scrolled');
+            } else {
+                header.removeClass('scrolled');
+            }
+        }
+        
+        // Initial check
+        updateHeader();
+        
+        // On scroll
+        $(window).on('scroll', function() {
+            updateHeader();
         });
     }
     
-    // Form validation
-    $('#lead-form').on('submit', function(e) {
-        var isValid = true;
-        var requiredFields = $(this).find('[required]');
+    // Mobile Menu
+    function initMobileMenu() {
+        const toggle = $('.menu-toggle');
+        const menu = $('.primary-menu');
+        const body = $('body');
         
-        requiredFields.each(function() {
-            if (!$(this).val()) {
-                $(this).addClass('error');
-                isValid = false;
+        toggle.on('click', function() {
+            const isActive = $(this).hasClass('active');
+            
+            if (isActive) {
+                $(this).removeClass('active');
+                menu.removeClass('active');
+                body.removeClass('menu-open');
             } else {
-                $(this).removeClass('error');
+                $(this).addClass('active');
+                menu.addClass('active');
+                body.addClass('menu-open');
             }
         });
         
-        // Email validation
-        var email = $('#email').val();
-        if (email && !isValidEmail(email)) {
-            $('#email').addClass('error');
-            isValid = false;
-        }
+        // Close menu on outside click
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.main-navigation').length && menu.hasClass('active')) {
+                toggle.removeClass('active');
+                menu.removeClass('active');
+                body.removeClass('menu-open');
+            }
+        });
         
-        // Phone validation
-        var phone = $('#phone').val();
-        if (phone && !isValidPhone(phone)) {
-            $('#phone').addClass('error');
-            isValid = false;
-        }
-        
-        if (!isValid) {
-            e.preventDefault();
-            alert('Please fill in all required fields correctly.');
-        }
-    });
-    
-    // Email validation helper
-    function isValidEmail(email) {
-        var pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return pattern.test(email);
+        // Close menu on escape key
+        $(document).on('keyup', function(e) {
+            if (e.keyCode === 27 && menu.hasClass('active')) {
+                toggle.removeClass('active');
+                menu.removeClass('active');
+                body.removeClass('menu-open');
+            }
+        });
     }
     
-    // Phone validation helper
-    function isValidPhone(phone) {
-        var pattern = /^[\d\s\-\+\(\)]+$/;
-        return pattern.test(phone) && phone.replace(/\D/g, '').length >= 10;
+    // Smooth Scroll
+    function initSmoothScroll() {
+        $('a[href*="#"]:not([href="#"])').on('click', function() {
+            if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
+                var target = $(this.hash);
+                target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+                
+                if (target.length) {
+                    $('html, body').animate({
+                        scrollTop: target.offset().top - 100
+                    }, 800, 'swing');
+                    return false;
+                }
+            }
+        });
     }
     
-    // Remove error class on input
-    $('#lead-form input, #lead-form select').on('input change', function() {
-        $(this).removeClass('error');
-    });
-    
-    // Track form field interactions
-    $('#lead-form input, #lead-form select').on('focus', function() {
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'form_interaction', {
-                'event_category': 'engagement',
-                'event_label': $(this).attr('name')
+    // Scroll Effects
+    function initScrollEffects() {
+        const elements = $('.fade-in, .slide-up, .slide-in');
+        
+        function checkVisibility() {
+            const windowHeight = $(window).height();
+            const scrollTop = $(window).scrollTop();
+            
+            elements.each(function() {
+                const $this = $(this);
+                const elementTop = $this.offset().top;
+                const elementHeight = $this.outerHeight();
+                
+                if (scrollTop + windowHeight > elementTop + 50 && scrollTop < elementTop + elementHeight) {
+                    $this.addClass('visible');
+                }
             });
         }
-    });
+        
+        // Initial check
+        checkVisibility();
+        
+        // On scroll
+        $(window).on('scroll', function() {
+            checkVisibility();
+        });
+    }
     
 })(jQuery);
